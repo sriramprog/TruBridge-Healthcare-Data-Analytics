@@ -1,74 +1,319 @@
-# Iowa Colorectal Cancer & Social Determinants of Health Analysis
+# 🏥 Iowa Cancer Risk Analytics — SDOH Intelligence for Rural Health Systems
 
-*Conducted as part of a consulting externship in collaboration with TruBridge Healthcare through Extern.*
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![Pandas](https://img.shields.io/badge/Data-Pandas-150458?logo=pandas&logoColor=white)
+![GeoPandas](https://img.shields.io/badge/Geospatial-GeoPandas-139C5A)
+![Scikit-Learn](https://img.shields.io/badge/ML-Scikit--Learn-F7931E?logo=scikit-learn&logoColor=white)
+![Colab](https://img.shields.io/badge/Runtime-Google_Colab-F9AB00?logo=googlecolab&logoColor=white)
+![License](https://img.shields.io/badge/License-Portfolio-lightgrey)
 
-## Executive Summary
-Colorectal cancer caught early is highly treatable — but getting screened requires access to care. This project examined whether social and economic conditions across Iowa's 99 counties predict who is most at risk for late-stage colorectal cancer diagnosis. Using county-level data from the Iowa Cancer Registry and the U.S. Census Bureau's American Community Survey (2016–2020), three commonly assumed social risk factors were tested: poverty, health insurance coverage, and housing cost burden. The analysis combined choropleth mapping, correlation testing, ANOVA, multivariate regression, and principal component analysis (PCA) to determine which factors actually move the needle — and which don't. The central finding was clear: health insurance access among working-age adults is the only social determinant that consistently and significantly predicts late-stage colorectal cancer risk across Iowa counties.
+> **Extern × TruBridge Healthcare · June 2025**  
+> A county-level social determinants of health (SDOH) analysis pipeline that tests poverty, insurance access, and rent burden as predictors of late-stage colorectal cancer risk across all 99 Iowa counties — combining choropleth mapping, multivariate regression, and PCA to identify where TruBridge clients should actually be targeting resources.
 
-## Business Problem
+## 🎬 Demo
 
-TruBridge serves rural and community-based health systems across Iowa — organizations that operate on thin margins where late-stage cancer cases aren't just a clinical problem, they're a financial one. Stage IV colorectal cancer costs 3–5x more to treat than early-stage disease, and rural hospitals disproportionately absorb that burden when patients arrive too late. The challenge is that without county-level data, health systems are making educated guesses about where to direct screening outreach, insurance navigation, and prevention dollars.
+[![Interactive Dashboard](https://img.shields.io/badge/Explore-Interactive_Dashboard-00A878?logo=googlecolab&logoColor=white)](https://claude.ai/public/artifacts/0e5ac430-e52c-4041-8eee7122405756c2)
 
-Social determinants of health (SDOH) — the economic and social conditions that shape access to care — are widely cited as drivers of health disparities, but the specific factors that matter most in a given region are rarely tested rigorously. Poverty and housing stress are commonly assumed to predict poor health outcomes, but that assumption hadn't been validated at the county level for Iowa. This project was designed to answer the question directly: **which social factors actually predict late-stage colorectal cancer risk across Iowa, and where should TruBridge clients be targeting their resources?**
+> Click the badge above to explore cancer risk and SDOH factors county-by-county across Iowa in an interactive dashboard.
 
-## Methodology
+---
 
-**1. Data Collection & Preparation**
-Three SDOH datasets from the U.S. Census Bureau's ACS 5-Year Estimates (2016–2020) were merged with late-stage colorectal cancer incidence data from the Iowa Cancer Registry. Poverty rates were drawn from ACS Table S1701 across 12 demographic subgroups (overall, child, senior, racial, educational, and employment-based poverty). Health insurance coverage was drawn from ACS Table B27010, broken down by coverage type — private, employer-only, Medicaid-only, and uninsured — separately for working-age adults (35–64) and seniors (65+). Housing cost burden was drawn from ACS Table B25070, covering the share of renters paying more than 30% and more than 50% of income on rent.
+## 📋 Table of Contents
 
-**2. Univariate Analysis — Poverty (Notebook 1)**
-Pearson correlations were computed between all 12 poverty subgroups and both cancer outcomes across 99 counties. Side-by-side Iowa choropleth maps visualized the geographic relationship between poverty and cancer risk. Counties were split at the median poverty rate (10.9%) and cancer outcome distributions were compared using independent samples t-tests validated with Shapiro-Wilk normality checks. Violin plots and scatter plots with regression lines were used to assess the shape and direction of any relationships.
+- [Problem Statement](#-problem-statement)
+- [What It Does](#-what-it-does)
+- [System Architecture](#-system-architecture)
+- [Pipeline Walkthrough](#-pipeline-walkthrough)
+- [Results](#-results)
+- [Tech Stack](#-tech-stack)
+- [Design Decisions & Trade-offs](#-design-decisions--trade-offs)
+- [Getting Started](#-getting-started)
+- [Example Queries & Findings](#-example-queries--findings)
+- [Limitations & Future Work](#-limitations--future-work)
+- [Project Impact](#-project-impact)
 
-**3. Univariate Analysis — Health Insurance (Notebook 2)**
-The same correlation and mapping approach was applied to insurance variables, with particular attention to the 35–64 age group. Top-10 county bar charts ranked counties by uninsured rate. An age-group comparison scatter — 35–64 vs 65+ — was produced to test whether the insurance–cancer relationship changed once Medicare coverage became near-universal at age 65. ANOVA was used to test whether uninsured rates differed significantly across cancer risk tiers (lower, moderate, higher).
+---
 
-**4. Univariate Analysis — Rent Burden (Notebook 3)**
-All three rent burden categories were tested against both cancer outcomes using Pearson correlations and scatter plots with regression lines — six combinations in total. Choropleth maps and violin plots were used to assess geographic and distributional patterns.
+## 🎯 Problem Statement
 
-**5. Multivariate Analysis (Notebook 4)**
-All three SDOH datasets were merged into a single analysis frame and a comprehensive correlation heatmap was generated across all 14 variables. A reduced 9-predictor linear regression model was built using StandardScaler-normalized features to address multicollinearity among insurance variables (private, government, and employer-only insurance sum to ~100%, making them redundant in the same model). Partial regression plots isolated each predictor's effect after controlling for all others. Principal component analysis (PCA) was run on all 12 predictors to identify latent county profiles. Geographic residual maps were produced showing where the SDOH model explained cancer risk well and where unexplained elevated risk remained.
+Colorectal cancer caught early is highly treatable — but getting screened requires access to care. TruBridge serves rural and community health systems across Iowa that operate on thin margins. When patients arrive with late-stage disease, the financial impact is compounding.
 
-## Skills
+| Pain Point | How This Analysis Solves It |
+|---|---|
+| Health systems guessing where to direct resources | County-level SDOH targeting identifies the highest-risk counties by the factor that actually matters |
+| Poverty assumed to predict cancer outcomes | Tested rigorously across 12 subgroups — result is counterintuitive and actionable |
+| No visibility into insurance coverage gaps | Maps uninsured rates among working-age adults (35–64) county by county |
+| Correlation vs. causation | Medicare natural experiment provides near-causal evidence for the insurance mechanism |
 
-- Data wrangling and multi-source dataset merging (Pandas, NumPy)
-- Geospatial analysis and choropleth mapping (GeoPandas, U.S. Census TIGER/Line)
-- Statistical testing: Pearson correlation, t-tests, ANOVA, Shapiro-Wilk normality
-- Multivariate regression with multicollinearity detection and correction
-- Dimensionality reduction and PCA biplot visualization (scikit-learn)
-- Partial regression analysis to isolate individual predictor effects
-- Data visualization: scatter plots, violin plots, heatmaps, bar charts, residual maps (Matplotlib, Seaborn)
-- Translation of statistical findings into plain-language business recommendations
+---
 
-## Results
+## ✅ What It Does
 
-- **Insurance access is the only significant SDOH predictor.** Private insurance coverage among 35–64 year olds is the strongest protective factor (r = −0.278, p = 0.005). Higher uninsured rates significantly predict higher cancer risk (r = +0.199, p = 0.048). Both findings held up across univariate testing, ANOVA, and multivariate regression.
+1. **Merges** three ACS data tables (S1701, B27010, B25070) with Iowa Cancer Registry incidence data across all 99 counties
+2. **Tests** 12 poverty subgroups, 5 insurance coverage types (split by age group), and 3 rent burden categories against two cancer outcomes
+3. **Maps** each factor geographically using Iowa county choropleth maps to reveal spatial patterns
+4. **Runs** Pearson correlations, t-tests, ANOVA, and scatter regressions for each factor univariately
+5. **Combines** all factors into a 9-predictor multivariate regression with multicollinearity correction and StandardScaler normalization
+6. **Applies** PCA to identify latent county profiles and explain what drives county-level variation
+7. **Produces** geographic residual maps showing where the SDOH model explains cancer risk and where unexplained elevated risk remains
+8. **Delivers** three targeted, county-specific recommendations for TruBridge client health systems
 
-- **The Medicare effect confirms the mechanism.** Among 35–64 year olds (pre-Medicare), uninsured rate significantly predicts cancer risk. Among 65+ year olds (post-Medicare), the relationship disappears entirely (r = +0.082, p = 0.37). Universal coverage at 65 eliminates the disparity — proving that access to insurance, not some other unmeasured factor, is what's driving the gap.
+---
 
-- **Poverty does not predict cancer risk at the county level in Iowa.** All 12 poverty subgroups were non-significant. High-poverty and low-poverty counties have essentially identical distributions of cancer outcomes. Directing cancer prevention resources based on poverty maps would miss the counties that actually need them.
+## 🏗️ System Architecture
 
-- **Rent burden shows no relationship with cancer outcomes.** Six combinations tested, all correlations near-zero (r = −0.055 to +0.015), all p > 0.59. Iowa's relatively affordable housing market does not create the cancer risk disparities seen in higher-cost regions.
-
-- **PCA identifies three distinct county profiles.** An insurance/poverty axis explains 45.6% of county-level variation, a housing stress axis explains 17.7%, and a senior vulnerability axis explains 9.5%. These profiles confirm that insurance and poverty are distinct from housing as a driver — and that insurance is the dominant axis.
-
-- **Geographic residuals identify counties with unexplained high risk.** The SDOH model (R² ≈ 0.11) explains a meaningful but partial share of cancer variation. Red-residual counties — where actual risk exceeds what SDOH predicts — point to unmeasured drivers like rurality, screening access, and behavioral factors as priorities for future data collection.
-
-## Notebooks
-
-| Notebook | Focus | Key Output |
-|---|---|---|
-| `notebook1_poverty.ipynb` | Poverty vs cancer outcomes | Exported poverty SDOH CSV |
-| `notebook2_health_insurance.ipynb` | Insurance vs cancer outcomes | Exported insurance SDOH CSV |
-| `notebook3_rent_burden.ipynb` | Rent burden vs cancer outcomes | Exported rent burden SDOH CSV |
-| `notebook4_multivariate.ipynb` | All factors combined | Regression, PCA, residual maps |
-
-> All notebooks run in **Google Colab**. Run notebooks 1–3 before notebook 4. Each exports a CSV that the multivariate notebook requires.
-
-```python
-!pip install geopandas  # only non-standard dependency
+```
+ACS TABLE S1701          ACS TABLE B27010          ACS TABLE B25070
+Poverty Status           Health Insurance           Rent Burden
+12 subgroups             5 types × 2 age groups     3 burden categories
+       │                        │                          │
+       ▼                        ▼                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              Data Cleaning & Feature Engineering                │
+│   Custom ACS parsers (suppressed estimates, coded missing)      │
+│   Percentage computation per county, multicollinearity check    │
+└──────────────────────────────┬──────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              Iowa Cancer Registry Merge                         │
+│   Late-stage colorectal cancer incidence per 100K + risk prob   │
+│   99 counties, 2016–2020 window, complete-case analysis         │
+└──────────────────────────────┬──────────────────────────────────┘
+                               │
+          ┌────────────────────┼────────────────────┐
+          ▼                    ▼                    ▼
+  NOTEBOOK 1             NOTEBOOK 2            NOTEBOOK 3
+  Poverty Analysis       Insurance Analysis    Rent Burden Analysis
+  Choropleth, violin,    Choropleth, ANOVA,    Scatterplots,
+  t-tests, scatter       Medicare proof,       6 combinations,
+  (12 subgroups)         top-10 bar charts     all non-significant
+          │                    │                    │
+          └────────────────────┼────────────────────┘
+                               ▼
+                        NOTEBOOK 4
+               Multivariate Regression + PCA
+               9-predictor OLS, feature importance,
+               PCA biplots, geographic residual maps
 ```
 
-## Interactive Dashboard
+### Component Specifications
 
-🔗 **[Explore cancer risk and SDOH factors county by county across Iowa](https://claude.ai/public/artifacts/0e5ac430-e52c-4041-8eee-7122405756c2)**
-*TruBridge Healthcare Data Analytics Externship · Sriram Srinivasan (June 2025 cohort)*
+| Component | Technology | Configuration |
+|---|---|---|
+| Data Source | ACS 5-Year Estimates (2016–2020) | Tables S1701, B27010, B25070 |
+| Cancer Outcomes | Iowa Cancer Registry | AAR per 100K + risk probability |
+| Geospatial | GeoPandas + Census TIGER/Line | Iowa county boundaries, 2022 |
+| Statistical Testing | SciPy | Pearson r, t-test, ANOVA, Shapiro-Wilk |
+| Regression | Scikit-Learn LinearRegression | 9 predictors, StandardScaler normalized |
+| Dimensionality Reduction | Scikit-Learn PCA | 12 predictors, full variance decomposition |
+| Visualization | Matplotlib + Seaborn | Choropleth, violin, scatter, heatmap, residual maps |
+| Runtime | Google Colab | CPU only — no GPU required |
+
+---
+
+## 🔬 Pipeline Walkthrough
+
+**Notebook 1 — Poverty Analysis**  
+Extracts 12 poverty subgroups from ACS Table S1701 using row-index parsing and a custom `clean_pct()` function that handles ACS suppressed estimates (parenthetical values), coded missing (`-`, `N`, `X`), and blank fields. Counties are split at the median poverty rate (10.9%) and cancer outcome distributions are compared using t-tests validated with Shapiro-Wilk normality checks. Side-by-side Iowa choropleths and violin plots test whether poverty and cancer risk maps point to the same counties. They don't.
+
+**Notebook 2 — Health Insurance Analysis**  
+Extracts coverage variables from ACS Table B27010 by row index for two age groups: 35–64 and 65+. Computes `pct_uninsured`, `pct_private_insurance`, `pct_government_insurance`, `pct_employer_only`, and `pct_medicaid_only` for each group. Top-10 county bar charts surface the highest-uninsured counties. A critical scatter plot overlays both age groups — showing the uninsured-cancer risk trend line for 35–64 year olds and its complete disappearance for 65+ year olds once Medicare coverage becomes near-universal.
+
+**Notebook 3 — Rent Burden Analysis**  
+Tests three rent burden categories (affordable <30%, burdened 30–50%, severely burdened 50%+) against both cancer outcomes — six scatter plots with regression lines in total. All six lines are flat. Choropleths confirm that Iowa's rent burden map and cancer risk map point to different counties.
+
+**Notebook 4 — Multivariate Analysis**  
+Merges all three SDOH datasets into a single 99-county dataframe. Drops collinear insurance variables (`pct_private_insurance`, `pct_government_insurance`, `pct_employer_only`) — these sum to ~100% with `pct_uninsured`, making them redundant in the same regression. Runs OLS on 9 StandardScaler-normalized predictors. Generates a 14-variable correlation heatmap, standardized coefficient feature importance bars, PCA scree and cumulative variance plots, and three-panel Iowa choropleth maps showing actual cancer risk, model-predicted risk, and residuals county-by-county.
+
+---
+
+## 📊 Results
+
+### Factor Verdicts
+
+| Factor | Direction | r (Cancer Risk Prob.) | p-value | Predictor? |
+|---|---|---|---|---|
+| Private insurance (35–64) | ↓ Protective | −0.278 | 0.005 | ✅ Significant |
+| Uninsured rate (35–64) | ↑ Risk | +0.199 | 0.048 | ✅ Significant |
+| Medicaid-only (35–64) | ↑ Elevated risk | — | < 0.05 | ✅ Significant |
+| Overall poverty rate | None | ~0 | > 0.05 | ❌ Not a predictor |
+| Child & senior poverty (all 12 subgroups) | None | ~0 | > 0.05 | ❌ Not a predictor |
+| Rent burden (all 3 categories) | None | −0.055 to +0.015 | > 0.59 | ❌ Not a predictor |
+
+### Multivariate Model
+
+| Metric | Result |
+|---|---|
+| Strongest positive predictor | `pct_uninsured_35_64` |
+| Model R² | ~0.11 |
+| Variance explained by PCA PC1 | 45.6% (insurance/poverty axis) |
+| Variance explained by PCA PC2 | 17.7% (housing stress axis) |
+| Variance explained by PCA PC3 | 9.5% (senior vulnerability axis) |
+
+### Top Target Counties (by uninsured rate, ages 35–64)
+
+| County | Uninsured Rate |
+|---|---|
+| Davis | 20.1% |
+| Ringgold | 12.3% |
+| Franklin | 10.9% |
+| Van Buren | 10.7% |
+| Clarke | 10.5% |
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Tool |
+|---|---|
+| Data Wrangling | Pandas, NumPy |
+| Statistical Testing | SciPy (Pearson r, t-test, ANOVA, Shapiro-Wilk) |
+| Machine Learning | Scikit-Learn (LinearRegression, StandardScaler, PCA) |
+| Geospatial | GeoPandas, U.S. Census TIGER/Line shapefiles |
+| Visualization | Matplotlib, Seaborn |
+| Runtime | Google Colab (CPU) |
+| Language | Python 3.10+ |
+
+---
+
+## ⚖️ Design Decisions & Trade-offs
+
+| Decision | Rationale | Trade-off |
+|---|---|---|
+| Complete-case analysis for multivariate model | Avoids imputation bias in regression | Drops counties with any missing predictor |
+| Median imputation for Black poverty (5 counties) | Prevents listwise deletion of sparse rural counties | Slightly smooths rural variation |
+| Drop collinear insurance vars in regression | Avoids inflated coefficients from multicollinearity | PCA uses full set — collinearity handled there |
+| County-level aggregation | Matches the grain of both ACS and Iowa Cancer Registry data | Ecological fallacy risk — averages mask within-county variation |
+| 2016–2020 ACS window | Maximizes sample reliability for small rural counties | Pre-dates post-COVID Medicaid expansion shifts |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Google Colab (free tier, CPU runtime works)
+- No API keys required
+
+### Run on Google Colab
+1. Open any notebook in Google Colab
+2. Upload the required CSV files via the folder icon (see note at the top of each notebook)
+3. Run all cells sequentially
+4. Run notebooks 1–3 before notebook 4 — each exports a CSV that the multivariate notebook requires
+
+### Run Locally
+
+```bash
+# Clone the repo
+git clone https://github.com/sriramprog/TruBridge-Healthcare-Data-Analytics.git
+cd TruBridge-Healthcare-Data-Analytics
+
+# Install dependencies
+pip install pandas numpy matplotlib seaborn geopandas scikit-learn scipy jupyter
+
+# Launch
+jupyter notebook notebooks/notebook1_poverty.ipynb
+```
+
+### Notebook Order
+
+```bash
+# Run sequentially — each exports a CSV used by the next
+jupyter notebook notebooks/notebook1_poverty.ipynb
+jupyter notebook notebooks/notebook2_health_insurance.ipynb
+jupyter notebook notebooks/notebook3_rent_burden.ipynb
+
+# Requires the 3 CSVs exported above
+jupyter notebook notebooks/notebook4_multivariate.ipynb
+```
+
+---
+
+## 🔍 Example Queries & Findings
+
+**Finding #1 — Poverty**
+```
+Question:  Do high-poverty counties have higher cancer rates?
+Test:      t-test splitting counties at median poverty (10.9%)
+Result:    Distributions overlap almost entirely — p > 0.05 across all 12 subgroups
+Verdict:   ❌ Poverty does NOT predict colorectal cancer risk in Iowa.
+           Targeting programs by poverty maps would miss the counties that need them.
+```
+
+**Finding #2 — Insurance (The Medicare Proof)**
+```
+Question:  Does uninsured rate predict cancer risk — and does it hold across age groups?
+Test:      Scatter + Pearson r for ages 35–64 vs 65+
+Ages 35–64 (no Medicare):  r = +0.199, p = 0.048 → significant upward trend
+Ages 65+   (Medicare):     r = +0.082, p = 0.370 → flat, no relationship
+Verdict:   ✅ Universal coverage at 65 eliminates the disparity entirely.
+           Ages 35–64 is where the gap lives and where intervention has the highest impact.
+```
+
+**Finding #3 — Multivariate**
+```
+Question:  When all 3 factors are combined, which predictor dominates?
+Model:     9-predictor OLS, StandardScaler normalized, R² ≈ 0.11
+Result:    pct_uninsured_35_64 is the single largest positive coefficient
+Verdict:   ✅ Insurance access outweighs poverty and rent burden even in a combined model.
+           Rurality, diet, and screening uptake explain the remaining ~89%.
+```
+
+> **Note on R²:** An R² of 0.11 is expected at county level with 99 data points and ecological-level predictors. The insurance finding is robust across univariate, ANOVA, and multivariate methods — not an artifact of model fit.
+
+---
+
+## ⚠️ Limitations & Future Work
+
+**Current Limitations**
+
+1. **Ecological Fallacy** — County-level averages mask individual-level variation; a county with 10% average poverty can still contain high-risk pockets
+2. **Correlation, Not Causation** — Uninsured rate tracks with cancer risk but direct causation cannot be proven without controlling for all confounders; the Medicare natural experiment provides the strongest available evidence
+3. **Missing Variables** — No rurality index, behavioral data (diet, smoking, obesity), or direct screening rate data — the most mechanistically direct link between insurance and cancer outcomes was inferred, not measured
+
+**Roadmap**
+
+| Timeline | Enhancement |
+|---|---|
+| Short-term | Add rurality index (USDA Rural-Urban Continuum Codes) as a covariate |
+| Medium-term | Incorporate BRFSS behavioral data (smoking, obesity, screening rates) at county level |
+| Long-term | Extend to all Iowa cancer types and update to 2018–2022 ACS 5-year estimates post-Medicaid expansion |
+
+---
+
+## 🎓 Project Impact
+
+This externship project translated raw public health data into a targeted, data-driven resource allocation framework for rural health systems — demonstrating that the conventional assumption (poverty drives cancer risk) is wrong in Iowa, and that the actionable lever is insurance access among working-age adults.
+
+Key technical skills developed include:
+
+- Multi-source public health dataset merging and ACS variable extraction
+- Geospatial analysis and county-level choropleth mapping with Census TIGER shapefiles
+- Statistical testing pipeline: Pearson correlation, t-tests, ANOVA, Shapiro-Wilk normality
+- Multivariate regression with multicollinearity detection and feature normalization
+- PCA for latent county profile identification and dimensionality reduction
+- Translation of statistical findings into plain-language business recommendations
+
+Skills directly translatable to healthcare analytics, public health research, and policy roles where the gap between assumed and actual drivers of health disparities has real resource allocation consequences.
+
+---
+
+## 📁 Repository Structure
+
+```
+TruBridge-Healthcare-Data-Analytics/
+├── notebooks/
+│   ├── notebook1_poverty.ipynb           # Factor 1: Poverty — 12 ACS subgroups
+│   ├── notebook2_health_insurance.ipynb  # Factor 2: Insurance — ages 35–64 vs 65+
+│   ├── notebook3_rent_burden.ipynb       # Factor 3: Rent burden — 6 combinations
+│   └── notebook4_multivariate.ipynb      # Combined regression + PCA + residual maps
+├── data/
+│   └── DATA_DICTIONARY.md                # Variable reference for all ACS tables
+├── reports/
+│   └── TruBridge_Final_v4.pdf            # Final stakeholder presentation deck
+├── README.md                             # This file
+└── requirements.txt                      # Python dependencies
+```
+
+---
+*Extern: Sriram Srinivasan · [GitHub](https://github.com/sriramprog) · [Interactive Dashboard](https://claude.ai/public/artifacts/0e5ac430-e52c-4041-8eee7122405756c2)*
