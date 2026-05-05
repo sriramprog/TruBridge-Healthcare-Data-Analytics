@@ -7,7 +7,7 @@
 ![Colab](https://img.shields.io/badge/Runtime-Google_Colab-F9AB00?logo=googlecolab&logoColor=white)
 ![License](https://img.shields.io/badge/License-Portfolio-lightgrey)
 
-> **Extern × TruBridge Healthcare · June 2025**  
+> **Extern × TruBridge Healthcare**  
 > A county-level social determinants of health (SDOH) analysis pipeline that tests poverty, insurance access, and rent burden as predictors of late-stage colorectal cancer risk across all 99 Iowa counties — combining choropleth mapping, multivariate regression, and PCA to identify where TruBridge clients should actually be targeting resources.
 
 ## 🎬 Demo
